@@ -82,9 +82,12 @@ def istft(input_tensor, n_fft, hop_length=None, win_length=None, window=None,
 
     if not skip_nola:
         window_envelop_lowest = window_envelop.abs().min().lt(1e-11)
-        if window_envelop_lowest.item():
+        window_envelop_lowest = torch.equal(window_envelop_lowest,
+                                            window_envelop_lowest.new_ones(window_envelop_lowest.shape,
+                                                                           device=window_envelop_lowest.device))
+        if window_envelop_lowest:
             raise ValueError("window overlap add min: {}".format(window_envelop_lowest))
-
+        
     y = y / window_envelop
     if input_dim == 3:
         y = y.squeeze(0)
